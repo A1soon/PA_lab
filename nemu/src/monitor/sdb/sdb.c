@@ -65,6 +65,15 @@ static int cmd_si(char *args){
   return 0;
 }
 
+static int cmd_info(char *args){
+  char *arg = strtok(NULL," ");
+  if(arg[0] == 'r'){
+	isa_reg_display();
+  }else
+	  printf("Unkonwn command please retype info_command\n");
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -73,7 +82,8 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  {"si","Stop after execting $i commands ",cmd_si},
+  {"si [N]","Stop after execting $i commands ",cmd_si},
+  {"info","print the value of all registers",cmd_info},
 
   /* TODO: Add more commands */
 
