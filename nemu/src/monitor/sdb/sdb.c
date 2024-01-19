@@ -66,8 +66,8 @@ static int cmd_si(char *args){
 }
 
 static int cmd_info(char *args){
-  char *arg = strtok(NULL," ");
-  if(arg[0] == 'r'){
+ // char *arg = strtok(NULL," ");
+  if(strcmp(args,"r") == 0){
 	  isa_reg_display();
   }/*else if(arg[0] == 'w')
 	  sdb_watchpoint_display();*/
@@ -84,8 +84,8 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  {"si","Stop after execting $i commands ",cmd_si},
-  {"info r","Print the value of all registers",cmd_info},
+  {"si","Type the number to execute $i instructions",cmd_si},
+  {"info","Type /'info r/' to check the value of all registers",cmd_info},
 
   /* TODO: Add more commands */
 
