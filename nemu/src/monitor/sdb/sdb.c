@@ -68,8 +68,10 @@ static int cmd_si(char *args){
 static int cmd_info(char *args){
   char *arg = strtok(NULL," ");
   if(arg[0] == 'r'){
-	isa_reg_display();
-  }else
+	  isa_reg_display();
+  }/*else if(arg[0] == 'w')
+	  sdb_watchpoint_display();*/
+  else
 	  printf("Unkonwn command please retype info_command\n");
   return 0;
 }
