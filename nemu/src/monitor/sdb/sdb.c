@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include<memory/paddr.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -76,6 +77,20 @@ static int cmd_info(char *args){
   return 0;
 }
 
+static int cmd_x(char *args){
+  char *n = strtok(NULL," ");
+  char *expr = strtok(NULL," ");
+  int len;
+  paddr_t addr;
+  sscanf(n,"%d",&len);
+  sscanf(expr,"%x",&addr);
+  for(int i = 0;i < len;i++){
+	printf("%x",paddr_read(addr,4));
+	addr =addr + 4;
+  }
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -86,7 +101,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   {"si","Type the number to execute $i instructions",cmd_si},
   {"info","Type [info r] to check the value of all registers",cmd_info},
-
+  {"x","TYpe x N EXPR to check the value of menmory",cmd_x},
   /* TODO: Add more commands */
 
 };
