@@ -85,7 +85,7 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   {"si","Type the number to execute $i instructions",cmd_si},
-  {"info","Type /'info r/' to check the value of all registers",cmd_info},
+  {"info","Type [info r] to check the value of all registers",cmd_info},
 
   /* TODO: Add more commands */
 
