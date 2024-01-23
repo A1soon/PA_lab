@@ -47,14 +47,16 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
-  {"==", TK_EQ},        // equal
+ // {"==", TK_EQ,		//equal
   {"\\-",'-'},          //sub
   {"\\*",'*'},          //mul 
   {"\\/",'/'},     	//div
 			
   {"\\(",TK_LEFT_PAR},//left parenthese
-  {"\\)",TK_RIGHT_PAR}, //right parenthese
+  {"\\)",TK_RIGHT_PAR}, //right parenthe
+			
   {"\\!\\=",TK_NEQ},	 // != not equal
+  {"\\=\\=",TK_EQ},	 // == equal
  
   {"\\!",'!'},		 //operator
   {"\\&\\&",TK_AND},	 //operator && and 
