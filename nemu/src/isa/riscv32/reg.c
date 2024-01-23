@@ -26,10 +26,10 @@ const char *regs[] = {
 void isa_reg_display() {
 	int lenth = sizeof(regs)/sizeof(regs[0]);
 	for(int i = 0;i < lenth;i++){
-		if(i != 0 && i%4 == 0)puts("");
-		printf("reg$%s ---> %#X\t",regs[i],cpu.gpr[i]);
+	//	if(i != 0 && i%4 == 0)puts("");
+		printf("%-8s%-#20x", regs[i], cpu.gpr[i]);
 	}
-	puts("");
+//	puts("");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
