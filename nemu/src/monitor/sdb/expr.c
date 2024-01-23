@@ -21,7 +21,16 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, 
+  TK_EQ = 1,
+  TK_NUM = 2,
+  TK_REGISTER = 3,
+  TK_NEQ = 4,
+  TK_HEX = 5,
+  TK_AND = 6,
+  TK_OR = 7,
+  TK_LEFT_PAR = 8,
+  TK_RIGHT_PAR = 9,
 
   /* TODO: Add more token types */
 
@@ -39,6 +48,21 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
+  {"\\-",'-'},          //sub
+  {"\\*",'*'},          //mul 
+  {"\\/",'/'},     	//div
+			
+  {"\\(",TK_LEFT_PAR},//left parenthese
+  {"\\)",TK_RIGHT_PAR}, //right parenthese
+  {"\\!\\=",TK_NEQ},	 // != not equal
+ 
+  {"\\!",'!'},		 //operator
+  {"\\&\\&",TK_AND},	 //operator && and 
+  {"\\|\\|",TK_OR},	 //operator || or
+	
+  {"[0-9]*",TK_NUM},		 //num
+  {"0[xX][0-9a-fA-F]+",TK_HEX},  //hex 0x...
+  {"\\$[a-zA-Z]*[0-9]",TK_REGISTER},  //register $register
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -94,8 +118,76 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
+	Token tmp_token;
         switch (rules[i].token_type) {
-          default: TODO();
+        	case '+':
+			tmp_token.type = '+';
+			tokens[nr_token ++] = tmp_token;
+			break;
+		case '-':
+			tmp_token.type = '-';
+			tokens[nr_token ++] = tmp_token;
+			break;
+		case '*':	
+	        	tmp_token.type ='*';
+			tokens[nr_token ++] = tmp_token;
+			break;
+		case '/':
+			tmp_token.type = '/';
+			tokens[nr_token ++] = tmp_token;
+			break;
+		case 256:
+			break;
+		case '!':
+			tmp_token.type = '!';
+			tokens[nr_token ++] = tmp_token;
+			break;
+		case 1:		//equal
+			tokens[nr_token].type = 1;
+			strcpy(tokens[nr_token].str,"==");
+			nr_token ++;
+			break;
+		case 2:		//num
+			tokens[nr_token].type = 2;
+			strncpy(tokens[nr_token].str,&e[position - substr_len],substr_len);
+			nr_token++;
+			break;
+		case 3:		//register
+			tokens[nr_token].type = 3;
+			strncpy(tokens[nr_token].str,&e[position - substr_len],substr_len);
+			nr_token ++;
+			break;
+		case 4:		//not equal
+			tokens[nr_token].type = 4;
+			strcpy(tokens[nr_token].str,"!=");
+			nr_token ++;
+			break;
+		case 5:		//HEX
+			tokens[nr_token].type = 5;
+			strncpy(tokens[nr_token].str,&e[position - substr_len],substr_len);
+			nr_token ++;
+			break;
+		case 6:		// && and
+			tokens[nr_token].type = 6;
+			strcpy(tokens[nr_token].str,"&&");
+			nr_token ++;
+			break;
+		case 7:		// || or
+			tokens[nr_token].type = 7;
+			strcpy(tokens[nr_token].str,"||");
+			nr_token ++;
+			break;
+		case 8:		// ( 
+			tmp_token.type = '(';
+			tokens[nr_token ++] = tmp_token;
+			break;
+		case 9:
+			tmp_token.type = ')';
+			tokens[nr_token ++] = tmp_token;
+			break;
+	
+		default:
+			printf("error! no regular expressions matches i = %d\n",i);
         }
 
         break;
