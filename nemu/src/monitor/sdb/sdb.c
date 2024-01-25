@@ -91,6 +91,24 @@ static int cmd_x(char *args){
   return 0;
 }
 
+static int cmd_p(char *args){
+  args = strtok(NULL,"\n");
+  if(args == NULL){
+	  printf("no EXPR\n");
+	  return 0;
+  }
+  bool success = false;
+  word_t ans;
+  ans = expr(args,&success);
+  if(success){
+  printf("%d 0x%x\n",ans,ans);
+  }
+  else{
+  printf("bad expression! please retype\n");
+  }
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -102,6 +120,7 @@ static struct {
   {"si","Type the number to execute $i instructions",cmd_si},
   {"info","Type [info r] to check the value of all registers",cmd_info},
   {"x","TYpe x N EXPR to check the value of menmory",cmd_x},
+  {"p","Type p $EXPR to evaluate the value of your expression",cmd_p}
   /* TODO: Add more commands */
 
 };
