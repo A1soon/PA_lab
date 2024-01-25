@@ -22,18 +22,31 @@
 
 enum {
   TK_NOTYPE = 256, 
-  TK_EQ = 1,
-  TK_NUM = 2,
-  TK_REGISTER = 3,
-  TK_NEQ = 4,
-  TK_HEX = 5,
-  TK_AND = 6,
-  TK_OR = 7,
-  TK_LEFT_PAR = 8,
-  TK_RIGHT_PAR = 9,
+  TK_AND = 1,
+  TK_OR ,
+  TK_EQ ,
+  TK_NEQ ,
+  TK_LEQ ,
+  TK_GEQ ,
+  TK_DREFER ,
+  TK_NUM ,
+  TK_REGISTER ,
+  TK_HEX ,
+  TK_LEFT_PAR ,
+  TK_RIGHT_PAR ,
 
   /* TODO: Add more token types */
 
+};
+
+enum priority{
+  LOGIC = 1,
+  LEQ_GEQ ,
+  NEQ_EQ ,
+  PLUS_SUB ,
+  MULTI_DIV ,
+  DREFER,
+  OTHER, 
 };
 
 static struct rule {
@@ -50,13 +63,13 @@ static struct rule {
  // {"==", TK_EQ,		//equal
   {"\\-",'-'},          //sub
   {"\\*",'*'},          //mul 
-  {"\\/",'/'},     	//div
+  {"/",'/'},     	//div
 			
   {"\\(",TK_LEFT_PAR},//left parenthese
   {"\\)",TK_RIGHT_PAR}, //right parenthe
 			
   {"\\!\\=",TK_NEQ},	 // != not equal
-  {"\\=\\=",TK_EQ},	 // == equal
+  {"==",TK_EQ},	 // == equal
  
   {"\\!",'!'},		 //operator
   {"\\&\\&",TK_AND},	 //operator && and 
@@ -144,50 +157,59 @@ static bool make_token(char *e) {
 			tmp_token.type = '!';
 			tokens[nr_token ++] = tmp_token;
 			break;
-		case 1:		//equal
-			tokens[nr_token].type = 1;
+		case TK_EQ:		//equal
+			tokens[nr_token].type = TK_EQ;
 			strcpy(tokens[nr_token].str,"==");
 			nr_token ++;
 			break;
-		case 2:		//num
-			tokens[nr_token].type = 2;
+		case TK_NUM:		//num
+			tokens[nr_token].type = TK_NUM;
 			strncpy(tokens[nr_token].str,&e[position - substr_len],substr_len);
 			nr_token++;
 			break;
-		case 3:		//register
-			tokens[nr_token].type = 3;
+		case TK_REGISTER:		//register
+			tokens[nr_token].type = TK_REGISTER;
 			strncpy(tokens[nr_token].str,&e[position - substr_len],substr_len);
 			nr_token ++;
 			break;
-		case 4:		//not equal
-			tokens[nr_token].type = 4;
+		case TK_NEQ:		//not equal
+			tokens[nr_token].type = TK_NEQ;
 			strcpy(tokens[nr_token].str,"!=");
 			nr_token ++;
 			break;
-		case 5:		//HEX
-			tokens[nr_token].type = 5;
+		case TK_HEX:		//HEX
+			tokens[nr_token].type = TK_HEX;
 			strncpy(tokens[nr_token].str,&e[position - substr_len],substr_len);
 			nr_token ++;
 			break;
-		case 6:		// && and
-			tokens[nr_token].type = 6;
+		case TK_AND:		// && and
+			tokens[nr_token].type = TK_AND;
 			strcpy(tokens[nr_token].str,"&&");
 			nr_token ++;
 			break;
-		case 7:		// || or
-			tokens[nr_token].type = 7;
+		case TK_OR:		// || or
+			tokens[nr_token].type = TK_OR;
 			strcpy(tokens[nr_token].str,"||");
 			nr_token ++;
 			break;
-		case 8:		// ( 
+		case TK_LEFT_PAR:		// ( 
 			tmp_token.type = '(';
 			tokens[nr_token ++] = tmp_token;
 			break;
-		case 9:
+		case TK_RIGHT_PAR:
 			tmp_token.type = ')';
 			tokens[nr_token ++] = tmp_token;
 			break;
-	
+		case TK_LEQ:
+			tokens[nr_token].type = TK_LEQ;
+		        strcpy(tokens[nr_token].str,"<=");
+			nr_token ++;
+			break;
+		case TK_GEQ:
+			tokens[nr_token].type = TK_GEQ;
+			strcpy(tokens[nr_token].str,">=");
+			nr_token ++;
+			break;
 		default:
 			printf("error! no regular expressions matches i = %d\n",i);
         }
@@ -205,6 +227,132 @@ static bool make_token(char *e) {
   return true;
 }
 
+static int priority_of_op(int type){
+	switch(type){
+		case TK_AND:
+		case TK_OR:
+			return LOGIC;
+		case TK_LEQ:
+		case TK_GEQ:
+			return LEQ_GEQ;
+		case TK_EQ:
+		case TK_NEQ:
+			return NEQ_EQ;
+		case '+':
+		case '-':
+			return PLUS_SUB;
+		case '*':
+		case '/':
+			return MULTI_DIV;
+		case TK_DREFER:
+			return DREFER;
+		default :
+			return OTHER;
+	}
+}
+
+
+
+bool check_parentheses(int left,int right){
+	if(tokens[left].type !='(' || tokens[right].type != ')')
+		return false;
+
+	int l = left,r = right;
+	int num = 0;
+	while(l < r){
+		if(tokens[l].type == '('){
+			num ++;
+			if(tokens[r].type == ')'){
+				l++;
+				r--;
+				num --;
+				continue;
+			}
+			else r--;
+
+		} 
+		else if(tokens[l].type == ')')return false;
+
+		else l++; 
+	}
+	
+	if(num != 0){
+		printf("parentheses are not matched!\n");
+		assert(0);
+	}
+	return true;
+}
+
+static int primary_operator(int p,int q){
+	int position = p,prior = OTHER;
+	for(;p <= q;p++){
+		int type = tokens[p].type;
+		int cur_prior = priority_of_op(type);
+
+		if(type == '('){
+			while(tokens[p].type !=')' ) p++;
+		}
+
+		if(cur_prior <= prior){
+			position = p;
+			prior = cur_prior;
+		}
+	}
+	return position;
+}
+
+word_t eval(int p,int q){
+  if(p > q){
+	  //bad expression
+	  printf("bad expression\n");
+	  assert(0);
+	  return -1;
+  }
+  else if(p == q){
+	  return atoi(tokens[p].str);
+  }
+  else if(check_parentheses(p,q)){
+	  return eval(p + 1,q - 1);
+  }
+  else {
+
+	int position = primary_operator(p,q);
+	int op_type = tokens[position].type;
+	word_t val1 = eval(p,position - 1);
+	word_t val2 = eval(position + 1,q);
+
+	switch(op_type){
+		case '+':
+			return val1 + val2;
+		case '-':
+			return val1 - val2;
+		case '*':
+			return val1 * val2;
+		case '/':
+			if(val2 == 0){
+				printf("error:A / 0\n");
+				assert(0);
+				return 0;
+			}
+			return val1 / val2;
+		case TK_AND :
+			return val1 && val2;
+		case TK_OR :
+			return val1 || val2;
+		case TK_EQ :
+			return val1 == val2;
+		case TK_NEQ :
+			return val1 != val2;
+		case TK_LEQ :
+			return val1 <= val2;
+		case TK_GEQ :
+			return val1 >= val2;
+		default:
+			printf("no operation type\n");
+			return 0;	
+	}
+  }
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -214,6 +362,7 @@ word_t expr(char *e, bool *success) {
 
   /* TODO: Insert codes to evaluate the expression. */
   TODO();
-
-  return 0;
+  int beg_str = 0;
+  int end_str = strlen(e);
+  return eval(beg_str,end_str);
 }
