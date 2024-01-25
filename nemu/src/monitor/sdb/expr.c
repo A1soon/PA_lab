@@ -375,7 +375,6 @@ word_t eval(int p,int q){
 		case '/':
 			if(val2 == 0){
 				printf("error:A / 0\n");
-				assert(0);
 				return 0;
 			}
 			return val1 / val2;
