@@ -24,7 +24,7 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
-
+void test_expr();
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -41,6 +41,44 @@ static char* rl_gets() {
   }
 
   return line_read;
+}
+
+/* function test_expr to test the function expr */
+void test_expr(){
+  FILE *fp = fopen("~/ics2023/nemu/tools/gen-expr/build/input_16","r");
+  if(fp == NULL){
+  printf("test_expr error\n");
+  return;
+  }
+  char *e = NULL;
+  word_t correct_res;
+  size_t len = 0;
+  ssize_t read;
+  bool success = false;
+
+  while(true){
+  if(fscanf(fp,"%u",&correct_res) == -1)break;
+  read = getline(&e,&len,fp);
+  e[read - 1] = '\0';
+
+  word_t res = expr(e,&success);
+
+  if(!success){
+  printf("failed to expr\n");
+  //assert(0);
+     }
+  if(res != correct_res){
+  puts(e);
+  printf("expected: %u ,got : %u \n",correct_res,res);
+  //assert(0);  
+     }
+  }
+
+  fclose(fp);
+  if(e) free(e);
+
+  Log("expr test pass");
+
 }
 
 static int cmd_c(char *args) {
@@ -195,6 +233,9 @@ void sdb_mainloop() {
 void init_sdb() {
   /* Compile the regular expressions. */
   init_regex();
+  
+  /* Initialize the expression test function*/
+  test_expr();
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();

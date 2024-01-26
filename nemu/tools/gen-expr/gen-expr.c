@@ -31,8 +31,56 @@ static char *code_format =
 "  return 0; "
 "}";
 
+static char* operations[] = {
+  "+",
+  "-",
+  "*",
+  "/",
+};
+
+#define NR_OPS sizeof(operations) / sizeof(char*)
+
+uint32_t choose(uint32_t n){
+  return rand() % n;
+}
+
+char *p = NULL;
+int size = 5 ;
+static void do_gen_rand_expr(int depth){
+  int options = depth > size ? 0 : choose(3);
+  switch(options){
+    case 0 :
+	    uint32_t num = rand() % 100 ;
+	    char strnum[32] = {'\0'};
+	    sprintf(strnum,"%d",num);
+	    strcpy(p,strnum);
+	    p += strlen(strnum);
+	    break;
+    case 1 :
+	    strcpy(p,"(");
+	    p += strlen("(");
+	    do_gen_rand_expr(depth + 1);
+	    strcpy(p,")");
+	    p += strlen(")");
+	    break;
+/*    case  2:
+	    strcpy(p," ");
+	    p += strlen(" ");
+	    break;*/
+    default :
+	    do_gen_rand_expr(depth + 1);
+	    char *op = operations[choose(NR_OPS)];
+	    strcpy(p,op);
+	    p += strlen(op);
+	    do_gen_rand_expr(depth + 1);
+	    break;
+  }
+}
+
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  p = buf;
+  do_gen_rand_expr(0);
+  p[0] = '\0';
 }
 
 int main(int argc, char *argv[]) {
