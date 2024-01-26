@@ -45,7 +45,7 @@ static char* rl_gets() {
 
 /* function test_expr to test the function expr */
 void test_expr(){
-  FILE *fp = fopen("~/ics2023/nemu/tools/gen-expr/build/input_16","r");
+  FILE *fp = fopen("/home/aison/ics2023/nemu/tools/gen-expr/build/input","r");
   if(fp == NULL){
   printf("test_expr error\n");
   return;
