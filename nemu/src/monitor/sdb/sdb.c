@@ -135,7 +135,7 @@ static int cmd_p(char *args){
 	  printf("no EXPR\n");
 	  return 0;
   }
-  bool success = false;
+  bool success = true;
   word_t ans;
   ans = expr(args,&success);
   if(success){

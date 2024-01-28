@@ -309,16 +309,16 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-
+  printf("success1 = %d\n",*success);
   /* TODO: Insert codes to evaluate the expression. */
  // TODO();
   int beg_str = 0;
   int end_str = nr_token - 1;
+  printf("nr_token = %d\n",nr_token);
   word_t ans = eval(beg_str,end_str,success);
+  printf("success2 = %d\n",*success);
   nr_token = 0;
-  if(!success){
-  return 0;
-  }
+ 
   return ans;
 }
 
