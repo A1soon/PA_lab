@@ -106,6 +106,10 @@ static int cmd_si(char *args){
 
 static int cmd_info(char *args){
  // char *arg = strtok(NULL," ");
+  if(args == NULL){
+  printf("no arguments\n");
+  return 0;
+  }
   if(strcmp(args,"r") == 0){
 	  isa_reg_display();
   }/*else if(arg[0] == 'w')
