@@ -184,13 +184,13 @@ bool check_parentheses(int p,int q){
 }
 
 static int find_major(int p,int q){
-
+  printf("int find_major p == %d,q == %d\n",p,q);
   int ret = -1,par = 0,op_pre = 0;
   for(int i = p;i <= q;i++){
     if(tokens[i].type == '('){
       par ++;
     }else if(tokens[i].type == ')'){
-      if(par == 0)return -1;
+      if(par == 0){printf("in find_major par \n");return -1;}
       par --;
     }else if(OFTYPES(tokens[i].type,nop_types)) continue;
     else if(par > 0) continue;
@@ -206,6 +206,7 @@ static int find_major(int p,int q){
       case '*': case '/': tmp_pre++;
       case TK_NEG: case TK_DEREF: case TK_POS: tmp_pre++; break;      
       default:
+	printf("in find_major default \n");
         return -1;
       }
       if(tmp_pre > op_pre || (tmp_pre == op_pre && !OFTYPES(tokens[i].type,op1_type))){
@@ -214,7 +215,7 @@ static int find_major(int p,int q){
       }
     }
   }
-  if(par != 0)return -1;
+  if(par != 0){printf("in find_major par == %d\n",par);return -1;}
   return ret ;
 }
 
@@ -287,6 +288,7 @@ word_t eval(int p,int q,bool *ok){
   }else if(check_parentheses(p,q)){
     return eval(p + 1,q - 1,ok);
   }else {
+    printf("int eval major p == %d q == %d\n",p,q);
     int major = find_major(p,q);
     if(major < 0){
       printf("in eval major ok == %d\n",*ok);
