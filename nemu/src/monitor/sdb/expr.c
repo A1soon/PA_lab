@@ -184,13 +184,13 @@ bool check_parentheses(int p,int q){
 }
 
 static int find_major(int p,int q){
-  printf("int find_major p == %d,q == %d\n",p,q);
+ // printf("int find_major p == %d,q == %d\n",p,q);
   int ret = -1,par = 0,op_pre = 0;
   for(int i = p;i <= q;i++){
     if(tokens[i].type == '('){
       par ++;
     }else if(tokens[i].type == ')'){
-      if(par == 0){printf("in find_major par \n");return -1;}
+      if(par == 0){/*printf("in find_major par \n");*/return -1;}
       par --;
     }else if(OFTYPES(tokens[i].type,nop_types)) continue;
     else if(par > 0) continue;
@@ -206,7 +206,7 @@ static int find_major(int p,int q){
       case '*': case '/': tmp_pre++;
       case TK_NEG: case TK_DEREF: case TK_POS: tmp_pre++; break;      
       default:
-	printf("in find_major default \n");
+	//printf("in find_major default \n");
         return -1;
       }
       if(tmp_pre > op_pre || (tmp_pre == op_pre && !OFTYPES(tokens[i].type,op1_type))){
@@ -215,7 +215,7 @@ static int find_major(int p,int q){
       }
     }
   }
-  if(par != 0){printf("in find_major par == %d\n",par);return -1;}
+  if(par != 0){/*printf("in find_major par == %d\n",par);*/return -1;}
   return ret ;
 }
 
@@ -229,7 +229,7 @@ static word_t eval_operand(int i,bool *ok){
   case TK_REG:
     return isa_reg_str2val(tokens[i].str,ok);
   default:
-    printf("in operand default ok == %d\n",*ok);
+   // printf("in operand default ok == %d\n",*ok);
     *ok = false;
     return 0;
   }
@@ -251,7 +251,7 @@ static word_t calc1(int op,word_t val,bool *ok){
 
 // double operator
 static word_t calc2(word_t val1,int op,word_t val2,bool *ok){
-  printf("calc2_ok1 == %d",*ok);
+ // printf("calc2_ok1 == %d\n",*ok);
   switch (op)
   {
   case '+':return val1 + val2;
@@ -273,7 +273,7 @@ static word_t calc2(word_t val1,int op,word_t val2,bool *ok){
   case TK_LE: return val1 <= val2;
   default:
 	  *ok = false;
-	  printf("calc2_ok2 == %d\n",*ok);
+	//  printf("calc2_ok2 == %d\n",*ok);
 	  return 0;  
   }
 }
@@ -288,10 +288,10 @@ word_t eval(int p,int q,bool *ok){
   }else if(check_parentheses(p,q)){
     return eval(p + 1,q - 1,ok);
   }else {
-    printf("int eval major p == %d q == %d\n",p,q);
+    //printf("int eval major p == %d q == %d\n",p,q);
     int major = find_major(p,q);
     if(major < 0){
-      printf("in eval major ok == %d\n",*ok);
+      //printf("in eval major ok == %d\n",*ok);
       *ok =false;
       return 0;
     }
@@ -300,7 +300,7 @@ word_t eval(int p,int q,bool *ok){
     word_t val2 = eval(major + 1,q,&ok2);
 
     if(!ok2){
-      printf("in function eval choose ok2 ok == %d\n",*ok);
+      //printf("in function eval choose ok2 ok == %d\n",*ok);
       *ok = false; //right expression is bad
       return 0;
     }
@@ -320,14 +320,14 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-  printf("success1 = %d\n",*success);
+ // printf("success1 = %d\n",*success);
   /* TODO: Insert codes to evaluate the expression. */
  // TODO();
   int beg_str = 0;
   int end_str = nr_token - 1;
-  printf("nr_token = %d\n",nr_token);
+  //printf("nr_token = %d\n",nr_token);
   word_t ans = eval(beg_str,end_str,success);
-  printf("success2 = %d\n",*success);
+  //printf("success2 = %d\n",*success);
   nr_token = 0;
  
   return ans;
