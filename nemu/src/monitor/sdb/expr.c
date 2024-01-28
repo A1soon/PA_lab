@@ -228,6 +228,7 @@ static word_t eval_operand(int i,bool *ok){
   case TK_REG:
     return isa_reg_str2val(tokens[i].str,ok);
   default:
+    printf("in operand default ok == %d\n",*ok);
     *ok = false;
     return 0;
   }
@@ -235,6 +236,7 @@ static word_t eval_operand(int i,bool *ok){
 
 // singal operator
 static word_t calc1(int op,word_t val,bool *ok){
+  printf("calc1_ok1 == %d\n",*ok);
   switch (op)
   {
   case TK_NEG:return -val;
@@ -242,11 +244,13 @@ static word_t calc1(int op,word_t val,bool *ok){
   case TK_DEREF:return vaddr_read(val,4);
   default: *ok = false;
   }
+  printf("calc1_ok2 == %d\n",*ok);
   return 0;
 }
 
 // double operator
 static word_t calc2(word_t val1,int op,word_t val2,bool *ok){
+  printf("calc2_ok1 == %d",*ok);
   switch (op)
   {
   case '+':return val1 + val2;
@@ -266,7 +270,10 @@ static word_t calc2(word_t val1,int op,word_t val2,bool *ok){
   case TK_LT: return val1 < val2;
   case TK_GE: return val1 >= val2;
   case TK_LE: return val1 <= val2;
-  default: *ok = false; return 0;  
+  default:
+	  *ok = false;
+	  printf("calc2_ok2 == %d\n",*ok);
+	  return 0;  
   }
 }
 
@@ -282,6 +289,7 @@ word_t eval(int p,int q,bool *ok){
   }else {
     int major = find_major(p,q);
     if(major < 0){
+      printf("in eval major ok == %d\n",*ok);
       *ok =false;
       return 0;
     }
@@ -290,6 +298,7 @@ word_t eval(int p,int q,bool *ok){
     word_t val2 = eval(major + 1,q,&ok2);
 
     if(!ok2){
+      printf("in function eval choose ok2 ok == %d\n",*ok);
       *ok = false; //right expression is bad
       return 0;
     }
