@@ -139,7 +139,7 @@ static int cmd_p(char *args){
   word_t ans;
   ans = expr(args,&success);
   if(success){
-  printf("%d 0x%x\n",ans,ans);
+  printf("%u\n",ans);
   }
   else{
   printf("bad expression! please retype\n");

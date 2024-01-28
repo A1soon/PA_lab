@@ -46,9 +46,9 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
 
   {"\\+", '+'},         // plus
-  {"-",'-'},          //sub
+  {"\\-",'-'},          //sub
   {"\\*",'*'},          //mul 
-  {"/",'/'},     	//div
+  {"\\/",'/'},     	//div
 			
   {"\\(",'('},//left parenthese
   {"\\)",')'}, //right parenthe
@@ -139,6 +139,7 @@ static bool make_token(char *e) {
 			tokens[nr_token].type = rules[i].token_type;
 			nr_token ++;
 			break;
+		case TK_NOTYPE:break;
 		case '*': case '-': case '+':
 			if(nr_token == 0 || !OFTYPES(tokens[nr_token - 1].type,bound_types)){
 			switch(rules[i].token_type)
@@ -147,7 +148,6 @@ static bool make_token(char *e) {
 			  case '+':tokens[nr_token ++].type = TK_POS;break;
 			  case '*':tokens[nr_token ++].type = TK_DEREF;break;
 			}
-			break;
 		}
 		default:
 			tokens[nr_token].type = rules[i].token_type ;
