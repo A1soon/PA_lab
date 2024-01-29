@@ -14,20 +14,7 @@
 ***************************************************************************************/
 
 #include "sdb.h"
-
-#define NR_WP 32
-
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
-
-static WP wp_pool[NR_WP] = {};
-static WP *head = NULL, *free_ = NULL;
-
+/*
 void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i ++) {
@@ -38,6 +25,61 @@ void init_wp_pool() {
   head = NULL;
   free_ = wp_pool;
 }
+*/
+/* TODO: Implement the functionality of watchpoint 
 
-/* TODO: Implement the functionality of watchpoint */
+static WP* new_wp(){
+  assert(free_);
+  WP* ret = free_;
+  free_ = free_ -> next;
+  ret->next = head;
+  head = ret;
+  return ret;
+}
+
+static void free_wp(WP *wp){
+  WP *h = head;
+  if(h == wp)head = NULL;
+  else {
+  while(h && h->next != wp)h = h->next;
+  assert(h);
+  h->next = wp->next;
+  }
+  wp->next = free_;
+  free_ = wp;
+}
+
+void wp_difftest(){
+  WP *h = head;
+  while(h){
+  bool success;
+  word_t new_val = expr(h->expr,&success);
+  if(h->old_val != new_val){
+  printf("WatchPoint %d: %s\n"
+ 	"old_val = %u\n"
+        "new_val = %u\n",h->NO,h->expr,
+	h->old_val,new_val);
+      }
+  h = h->next;
+  }
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

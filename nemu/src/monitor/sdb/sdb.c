@@ -20,11 +20,31 @@
 #include<memory/paddr.h>
 #include "sdb.h"
 
+
 static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
 void test_expr();
+
+/*the static value in watchpoint.h*/
+#define NR_WP 32
+typedef struct watchpoint {
+  int NO;
+  struct watchpoint *next;
+
+  /* TODO: Add more members if necessary */
+  word_t old_val;
+  char expr[1024];
+
+} WP;
+
+static WP wp_pool[NR_WP] = {};
+static WP *head = NULL, *free_ = NULL;
+
+static WP* new_wp();
+static void free_wp(WP *wp);
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -104,6 +124,8 @@ static int cmd_si(char *args){
   return 0;
 }
 
+void wp_iterate();
+
 static int cmd_info(char *args){
  // char *arg = strtok(NULL," ");
   if(args == NULL){
@@ -112,8 +134,8 @@ static int cmd_info(char *args){
   }
   if(strcmp(args,"r") == 0){
 	  isa_reg_display();
-  }/*else if(arg[0] == 'w')
-	  sdb_watchpoint_display();*/
+  }else if(strcmp(args,"w") == 0)
+	  wp_iterate();
   else
 	  printf("Unkonwn command please retype info_command\n");
   return 0;
@@ -151,6 +173,115 @@ static int cmd_p(char *args){
   return 0;
 }
 
+void wp_watch(char *expr,word_t res);
+void wp_remove(int no);
+
+static int cmd_w(char *args){
+  char *arg = strtok(NULL,"\n");
+  if(arg == NULL){
+  printf("Usage:w EXPR\n");
+  return 0;
+  }
+  bool success;
+  word_t res = expr(arg,&success);
+  if(success){
+  wp_watch(arg,res);
+  }else puts("invalid expression\n");
+
+  return 0;
+}
+
+static int cmd_d(char *args){
+  char *arg = strtok(NULL," ");
+  if(arg == NULL){
+  printf("Usage: d N\n");
+  return 0;
+  }
+  int NO = strtol(arg,NULL,10);
+  wp_remove(NO);
+  return 0;
+}
+
+void wp_watch(char *expr,word_t res){
+  WP *wp = new_wp();
+  strcpy(wp->expr,expr);
+  wp->old_val = res;
+  printf("Watchpoint %d: %s\n",wp->NO,expr);
+}
+
+void wp_remove(int no){
+  assert(no < NR_WP);
+  WP *wp = &wp_pool[no];
+  free_wp(wp);
+  printf("Delete watchpoint %d: %s\n",wp->NO,wp->expr);
+}
+
+void wp_iterate(){
+  WP *h = head;
+  if(h == NULL){
+  printf("no WatchPoints\n");
+  return ;
+  }
+  printf("%-8s%-8s\n","Num","EXPR");
+  while(h != NULL){
+  printf("%-8d%-8s\n",h->NO,h->expr);
+  h = h->next;
+  }
+}
+
+// watchpoint.c function
+
+void init_wp_pool() {
+  int i;
+  for (i = 0; i < NR_WP; i ++) {
+    wp_pool[i].NO = i;
+    wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+  }
+
+  head = NULL;
+  free_ = wp_pool;
+}
+
+/* TODO: Implement the functionality of watchpoint */
+
+static WP* new_wp(){
+  assert(free_);
+  WP* ret = free_;
+  free_ = free_ -> next;
+  ret->next = head;
+  head = ret;
+  return ret;
+}
+
+static void free_wp(WP *wp){
+  WP *h = head;
+  if(h == wp)head = NULL;
+  else {
+  while(h && h->next != wp)h = h->next;
+  assert(h);
+  h->next = wp->next;
+  }
+  wp->next = free_;
+  free_ = wp;
+}
+
+void wp_difftest(){
+  WP *h = head;
+  while(h){
+  bool success;
+  word_t new_val = expr(h->expr,&success);
+  if(h->old_val != new_val){
+  printf("WatchPoint %d: %s\n"
+ 	"old_val = %u\n"
+        "new_val = %u\n",h->NO,h->expr,
+	h->old_val,new_val);
+      }
+  h = h->next;
+  }
+}
+
+
+
 static struct {
   const char *name;
   const char *description;
@@ -162,7 +293,9 @@ static struct {
   {"si","Type the number to execute $i instructions",cmd_si},
   {"info","Type [info r] to check the value of all registers",cmd_info},
   {"x","TYpe x N EXPR to check the value of menmory",cmd_x},
-  {"p","Type p $EXPR to evaluate the value of your expression",cmd_p}
+  {"p","Type p $EXPR to evaluate the value of your expression",cmd_p},
+  {"w","Usage:w EXPR. Watch for the variation of the result of EXPR,pause at variation point",cmd_w},
+  {"d","Usage:d N.Delete watchpoint of wp. ",cmd_d},
   /* TODO: Add more commands */
 
 };
@@ -239,7 +372,7 @@ void init_sdb() {
   init_regex();
   
   /* Initialize the expression test function*/
-  test_expr();
+  //  test_expr();
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();

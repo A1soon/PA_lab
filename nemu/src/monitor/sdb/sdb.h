@@ -18,6 +18,13 @@
 
 #include <common.h>
 
+
+
+
 word_t expr(char *e, bool *success);
+
+
+void init_wp_pool() ;
+void wp_difftest();
 
 #endif
